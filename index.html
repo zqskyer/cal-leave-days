@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>产假计算器</title>
+    <style>
+        /* 基础样式设置 */
+        body {
+            font-family: Arial, sans-serif; /* 设置字体 */
+            margin: 20px; /* 页面边距 */
+        }
+        
+        /* 标题样式 */
+        h1 {
+            color: #333;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        /* 按钮样式 */
+        button {
+            margin: 10px 0; /* 上下边距 */
+            padding: 8px 16px; /* 内边距 */
+            cursor: pointer; /* 鼠标指针样式 */
+            background-color: #4CAF50; /* 绿色背景 */
+            color: white; /* 白色文字 */
+            border: none; /* 无边框 */
+            border-radius: 4px; /* 圆角 */
+            font-size: 14px; /* 字体大小 */
+        }
+        
+        /* 按钮悬停效果 */
+        button:hover {
+            background-color: #45a049; /* 深绿色 */
+        }
+        
+        /* 表格基础样式 */
+        table {
+            width: 100%; /* 宽度占满 */
+            border-collapse: collapse; /* 合并边框 */
+            margin-top: 20px; /* 上边距 */
+        }
+        
+        /* 表格单元格样式 */
+        th, td {
+            border: 1px solid #ddd; /* 灰色边框 */
+            padding: 8px; /* 内边距 */
+            text-align: center; /* 文字居中 */
+        }
+        
+        /* 表头样式 */
+        th {
+            background-color: #e0f7fa; /* 浅蓝色背景 */
+            color: black; /* 黑色文字 */
+        }
+        
+        /* 不同类型日期的背景色 */
+        .holiday {
+            background-color: #ffebee; /* 法定节假日-浅红色 */
+        }
+        .workday {
+            background-color: #e8f5e9; /* 调休工作日-浅绿色 */
+        }
+        .weekend {
+            background-color: #e0f7fa; /* 周末-浅蓝色 */
+        }
+        
+        /* 最大工作日标记样式 */
+        .max-workdays-158, .max-workdays-178, .max-workdays-190 {
+            color: red; /* 红色文字 */
+            font-weight: bold; /* 加粗 */
+        }
+        
+        /* 图例样式 */
+        .legend {
+            margin: 10px 0; /* 上下边距 */
+            padding: 10px; /* 内边距 */
+            background-color: #f9f9f9; /* 浅灰色背景 */
+            border: 1px solid #ddd; /* 边框 */
+            border-radius: 4px; /* 圆角 */
+        }
+        
+        /* 图例项目样式 */
+        .legend-item {
+            display: inline-block; /* 内联块级元素 */
+            margin-right: 20px; /* 右边距 */
+        }
+        
+        /* 图例颜色块样式 */
+        .legend-color {
+            display: inline-block; /* 内联块级元素 */
+            width: 20px; /* 宽度 */
+            height: 20px; /* 高度 */
+            margin-right: 5px; /* 右边距 */
+            vertical-align: middle; /* 垂直对齐 */
+        }
+        
+        /* 添加导出图片按钮样式 */
+        #exportImageBtn {
+            background-color: #2196F3; /* 蓝色背景 */
+            margin-left: 10px;
+        }
+        
+        #exportImageBtn:hover {
+            background-color: #1976D2; /* 深蓝色 */
+        }
+        
+        /* 添加加载动画样式 */
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        
+        /* 添加下载提示样式 */
+        .download-tip {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* 修改水印设置区域样式 */
+        .watermark-settings {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .watermark-settings h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 16px;
+            display: inline-block;
+            margin-right: 20px;
+            vertical-align: middle;
+        }
+        
+        .watermark-controls {
+            display: inline-flex;
+            align-items: center;
+            gap: 20px;
+            vertical-align: middle;
+        }
+        
+        .control-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: auto;
+        }
+        
+        .control-item label {
+            margin: 0;
+            white-space: nowrap;
+        }
+        
+        .control-item input[type="text"] {
+            width: 150px;
+            padding: 5px 8px;
+        }
+        
+        .control-item input[type="range"] {
+            width: 100px;
+            margin: 0;
+        }
+        
+        .control-item span {
+            min-width: 45px;
+        }
+        
+        /* 按钮组样式 */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 0;
+        }
+        
+        .button-group button {
+            margin: 0;
+        }
+        
+        /* 水印容器样式 */
+        #watermarkContainer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+        
+        /* 水印文本样式 */
+        .watermark-text {
+            position: absolute;
+            pointer-events: none;
+            user-select: none;
+            transform: rotate(-45deg);
+            transform-origin: center;
+            font-size: 18px;
+            white-space: nowrap;
+            color: rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
+            z-index: 1000;
+            width: max-content;
+        }
+        
+        /* 修改图例和水印设置容器样式 */
+        .settings-container {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .settings-container .section {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+        }
+        
+        .settings-container .section:first-child {
+            padding-top: 0;
+        }
+        
+        .settings-container .section:last-child {
+            padding-bottom: 0;
+        }
+        
+        .settings-container .section + .section {
+            border-top: 1px solid #eee;
+        }
+        
+        .section-title {
+            margin: 0;
+            color: #333;
+            font-size: 16px;
+            font-weight: bold;
+            min-width: 80px;
+            margin-right: 20px;
+        }
+        
+        .legend-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .watermark-controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex: 1;
+        }
+        
+        .control-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .control-item label {
+            margin: 0;
+            white-space: nowrap;
+            color: #666;
+        }
+        
+        .control-item input[type="text"] {
+            width: 150px;
+            padding: 5px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .control-item input[type="range"] {
+            width: 100px;
+        }
+        
+        .control-item span {
+            min-width: 45px;
+            color: #666;
+        }
+        
+        /* 修改输入区域样式 */
+        .input-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* 统一输入控件样式 */
+        .input-group select,
+        .input-group input[type="text"],
+        .button-group button {
+            height: 32px;
+            padding: 0 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 30px;
+            box-sizing: border-box;
+        }
+        
+        .input-group select {
+            padding-right: 24px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath fill='%23666' d='M0 2l4 4 4-4z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 8px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        
+        .input-group input[type="text"] {
+            width: 200px;
+        }
+        
+        /* 按钮组样式 */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 0;
+        }
+        
+        .button-group button {
+            margin: 0;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            transition: background-color 0.3s;
+            min-width: 80px;
+        }
+        
+        .button-group button:hover {
+            background-color: #45a049;
+        }
+        
+        #exportBtn {
+            background-color: #2196F3;
+        }
+        
+        #exportBtn:hover {
+            background-color: #1976D2;
+        }
+        
+        #exportImageBtn {
+            background-color: #9C27B0;
+        }
+        
+        #exportImageBtn:hover {
+            background-color: #7B1FA2;
+        }
+        
+        /* 表格标题样式优化 */
+        #resultTable {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        
+        #resultTable thead {
+            background-color: #f8f8f8;
+        }
+        
+        #resultTable thead tr:first-child {
+            background-color: #f2f2f2;
+        }
+        
+        #resultTable thead th {
+            border: 1px solid #ddd;
+            padding: 12px 8px;
+            text-align: center;
+            vertical-align: middle;
+            font-weight: normal;
+            color: #333;
+        }
+        
+        #resultTable thead tr:first-child th {
+            background-color: #e0f7fa;
+            font-weight: bold;
+        }
+
+        #resultTable thead tr:nth-child(2) th {
+            background-color: #ffebee;
+            font-weight: bold;
+        }
+        
+        #resultTable tbody td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        
+        /* 月份标题样式 */
+        #resultTable caption {
+            background-color: #f8e7de;
+            padding: 10px;
+            font-weight: bold;
+            border: 1px solid #ddd;
+            border-bottom: none;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+<body>
+    <!-- 添加水印容器 -->
+    <div id="watermarkContainer"></div>
+    <h1>产假计算器</h1>
+    <div class="input-container">
+        <div class="input-group">
+            <label for="yearSelect">选择年份：</label>
+            <select id="yearSelect">
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="monthSelect">选择月份：</label>
+            <select id="monthSelect">
+                <option value="all">全年</option>
+                <option value="0">1月</option>
+                <option value="1">2月</option>
+                <option value="2">3月</option>
+                <option value="3">4月</option>
+                <option value="4">5月</option>
+                <option value="5">6月</option>
+                <option value="6">7月</option>
+                <option value="7">8月</option>
+                <option value="8">9月</option>
+                <option value="9">10月</option>
+                <option value="10">11月</option>
+                <option value="11">12月</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="leaveDays">产假天数：</label>
+            <input type="text" id="leaveDays" value="158,178,190" placeholder="例如：158,178,190">
+        </div>
+        <div class="button-group">
+            <button id="calculateBtn">计算</button>
+            <button id="exportBtn">导出Excel</button>
+            <button id="exportImageBtn">导出图片</button>
+        </div>
+    </div>
+    
+    <div class="input-container">
+        <div class="input-group">
+            <label for="dueDate">预产期：</label>
+            <input type="date" id="dueDate">
+        </div>
+        <div class="input-group">
+            <label for="dueDateLeaveDays">产假天数：</label>
+            <input type="number" id="dueDateLeaveDays" value="158" min="1" max="365">
+        </div>
+        <div class="button-group">
+            <button id="calculateDueDate">计算预产期产假</button>
+            <button id="exportDueDateBtn">导出Excel</button>
+            <button id="exportDueDateImageBtn">导出图片</button>
+        </div>
+    </div>
+
+    <div class="settings-container">
+        <div class="section">
+            <h3 class="section-title">图例：</h3>
+            <div class="legend-items">
+        <div class="legend-item">
+            <span class="legend-color" style="background-color: #ffebee;"></span>
+            <span>法定节假日</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color" style="background-color: #e8f5e9;"></span>
+            <span>调休工作日（需要补班）</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color" style="background-color: #e0f7fa;"></span>
+            <span>周末</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color" style="background-color: transparent; border: 1px solid #ddd;"></span>
+            <span>红色数字表示对应假期类型当月工作日最多的日期</span>
+        </div>
+    </div>
+        </div>
+        <div class="section">
+            <h3 class="section-title">水印：</h3>
+            <div class="watermark-controls">
+                <div class="control-item">
+                    <label for="watermarkText">文字</label>
+                    <input type="text" id="watermarkText" placeholder="请输入水印文字" value="产假计算器">
+                </div>
+                <div class="control-item">
+                    <label for="watermarkOpacity">不透明度</label>
+                    <input type="range" id="watermarkOpacity" min="1" max="50" value="38">
+                    <span id="opacityValue">38%</span>
+                </div>
+                <div class="control-item">
+                    <label for="watermarkSpacing">间距</label>
+                    <input type="range" id="watermarkSpacing" min="50" max="300" value="300" step="10">
+                    <span id="spacingValue">300px</span>
+                </div>
+                <div class="control-item">
+                    <label for="exportWidth">导出宽度</label>
+                    <input type="number" id="exportWidth" min="800" max="3000" value="1000" step="100">
+                    <span>px</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="loadingTip" class="loading" style="display: none;">正在生成图片，请稍候...</div>
+    <div id="downloadTip" class="download-tip">图片已生成，正在下载...</div>
+    <table id="resultTable">
+        <caption>2025年9月</caption>
+        <thead>
+            <tr id="headerRow">
+                <th rowspan="2">产假开始日</th>
+                <!-- 动态表头将在JavaScript中生成 -->
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- 计算结果将插入到这里 -->
+        </tbody>
+    </table>
+
+    <script>
+        /**
+         * 获取指定年份的节假日数据
+         * @param {number} year - 要获取的年份
+         * @returns {Object} 包含holidays和workdays的对象
+         */
+        async function getHolidayData(year) {
+            try {
+                // 获取当年和下一年的节假日数据
+                const currentYearData = await fetch(`https://timor.tech/api/holiday/year/${year}`).then(res => res.json());
+                const nextYearData = await fetch(`https://timor.tech/api/holiday/year/${year + 1}`).then(res => res.json());
+                
+                const holidays = {}; // 存储节假日信息
+                const workdays = []; // 存储调休工作日信息
+                
+                // 处理当前年份数据
+                if (currentYearData.code === 0) {
+                    for (const dateStr in currentYearData.holiday) {
+                        const item = currentYearData.holiday[dateStr];
+                        const fullDateStr = `${year}-${dateStr}`;
+                        
+                        if (item.holiday === true) {
+                            // 如果是节假日，记录节假日名称
+                            holidays[fullDateStr] = item.name;
+                        } else if (item.holiday === false) {
+                            // 如果是调休工作日，添加到工作日列表
+                            workdays.push(fullDateStr);
+                        }
+                    }
+                }
+                
+                // 处理下一年份数据
+                if (nextYearData.code === 0) {
+                    for (const dateStr in nextYearData.holiday) {
+                        const item = nextYearData.holiday[dateStr];
+                        const fullDateStr = `${year + 1}-${dateStr}`;
+                        
+                        if (item.holiday === true) {
+                            holidays[fullDateStr] = item.name;
+                        } else if (item.holiday === false) {
+                            workdays.push(fullDateStr);
+                        }
+                    }
+                }
+                
+                return { holidays, workdays };
+            } catch (error) {
+                console.error('获取节假日数据失败:', error);
+                return { holidays: {}, workdays: [] };
+            }
+        }
+
+        /**
+         * 计算两个日期之间的工作日天数
+         * @param {Date} startDate - 开始日期
+         * @param {Date} endDate - 结束日期
+         * @param {Object} holidayData - 节假日数据
+         * @returns {number} 工作日天数
+         */
+        async function getWorkingDays(startDate, endDate, holidayData) {
+            let workDays = 0;
+            let currentDate = new Date(startDate);
+            const end = new Date(endDate);
+            
+            while (currentDate <= end) {
+                const dayOfWeek = currentDate.getDay();
+                const dateString = formatDate(currentDate);
+                
+                // 判断是否为工作日
+                if (holidayData.workdays.includes(dateString)) {
+                    // 调休工作日算作工作日
+                    workDays++;
+                } else if (!holidayData.holidays[dateString] && dayOfWeek !== 0 && dayOfWeek !== 6) {
+                    // 非节假日且非周末算作工作日
+                    workDays++;
+                }
+                
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            return workDays;
+        }
+
+        /**
+         * 格式化日期为YYYY-MM-DD格式
+         * @param {Date} date - 要格式化的日期
+         * @returns {string} 格式化后的日期字符串
+         */
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        /**
+         * 获取日期类型说明（节假日/调休/周末）
+         * @param {string} dateStr - 日期字符串
+         * @param {Object} holidayData - 节假日数据
+         * @returns {string} 日期类型说明
+         */
+        function getDateType(dateStr, holidayData) {
+            // 检查是否为法定节假日
+            if (holidayData.holidays[dateStr]) {
+                return ` (${holidayData.holidays[dateStr]})`; // 返回节假日名称
+            } 
+            // 检查是否为调休工作日
+            else if (holidayData.workdays.includes(dateStr)) {
+                return ' (调休)';
+            } 
+            else {
+                // 检查是否为周末
+                const date = new Date(dateStr);
+                const dayOfWeek = date.getDay();
+                if (dayOfWeek === 0 || dayOfWeek === 6) { // 0表示周日,6表示周六
+                    return ' (周末)';
+                }
+            }
+            // 如果都不是特殊日期,返回空字符串
+            return '';
+        }
+
+        /**
+         * 计算总休假天数（包括前置非工作日）
+         * @param {Date} startDate - 开始日期
+         * @param {Date} endDate - 结束日期
+         * @param {Object} holidayData - 节假日数据
+         * @returns {number} 总休假天数
+         */
+        function calculateTotalLeaveDays(startDate, endDate, holidayData) {
+            let totalDays = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+            let previousDay = new Date(startDate);
+            
+            // 检查前置非工作日
+            while (true) {
+                previousDay.setDate(previousDay.getDate() - 1);
+                if (!isWorkDay(previousDay, holidayData)) {
+                    totalDays = totalDays + 1;
+                } else {
+                    break;
+                }
+            }
+            
+            return totalDays;
+        }
+
+        /**
+         * 判断日期是否为工作日
+         * @param {Date} date - 要判断的日期
+         * @param {Object} holidayData - 节假日数据
+         * @returns {boolean} 是否为工作日
+         */
+        function isWorkDay(date, holidayData) {
+            const dateStr = formatDate(date);
+            const dayOfWeek = date.getDay();
+        
+            if (holidayData.workdays.includes(dateStr)) {
+                return true; // 调休工作日
+            }
+            if (holidayData.holidays[dateStr]) {
+                return false; // 法定节假日
+            }
+            if (dayOfWeek === 0 || dayOfWeek === 6) {
+                return false; // 周末
+            } 
+            return true; // 普通工作日
+        }
+
+        /**
+         * 添加指定天数并调整到最近的工作日
+         * @param {Date} date - 起始日期
+         * @param {number} days - 要添加的天数
+         * @param {Object} holidayData - 节假日数据
+         * @returns {Date} 调整后的日期
+         */
+        function addDays(date, days, holidayData) {
+            const result = new Date(date);
+            result.setDate(result.getDate() + days);
+            
+            // 如果结束日期不是工作日，向前查找最近的工作日
+            while (!isWorkDay(result, holidayData)) {
+                result.setDate(result.getDate() - 1);
+            }
+            
+            return result;
+        }
+
+        /**
+         * 更新导出按钮状态
+         * @param {boolean} enabled - 是否启用按钮
+         */
+        function updateExportButtonState(enabled) {
+            const exportBtn = document.getElementById('exportBtn');
+            exportBtn.disabled = !enabled;
+            exportBtn.style.opacity = enabled ? '1' : '0.5';
+            exportBtn.style.cursor = enabled ? 'pointer' : 'not-allowed';
+        }
+
+        /**
+         * 导出计算结果到Excel文件
+         */
+        function exportToExcel() {
+            try {
+                // 获取用户选择的年份和月份
+                const year = document.getElementById('yearSelect').value;
+                const month = document.getElementById('monthSelect').value;
+                const monthText = month === 'all' ? '1月~12月' : `${parseInt(month) + 1}月`;
+
+                // 创建新的工作簿
+                const wb = XLSX.utils.book_new();
+                const wsData = [];
+
+                // 添加标题行
+                wsData.push([{
+                    v: '产假计算结果',
+                    s: { font: { sz: 16, bold: true }, alignment: { horizontal: 'center' } }
+                }]);
+                wsData.push([]); // 空行
+
+                // 添加图例说明
+                wsData.push([{ v: '说明：', s: { font: { bold: true } } }]);
+                wsData.push([{ v: '■ 法定节假日', s: { fill: { fgColor: { rgb: 'FFEBEE' } } } }]);
+                wsData.push([{ v: '■ 调休工作日（需要补班）', s: { fill: { fgColor: { rgb: 'E8F5E9' } } } }]);
+                wsData.push([{ v: '■ 周末', s: { fill: { fgColor: { rgb: 'E0F7FA' } } } }]);
+                wsData.push([{ v: '■ 红色数字表示工作日天数最多的日期', s: { font: { color: { rgb: 'FF0000' } } } }]);
+                wsData.push([]);
+
+                // 获取产假天数
+                const leaveDaysArray = document.getElementById('leaveDays').value
+                    .split(',')
+                    .map(days => parseInt(days.trim()))
+                    .filter(days => !isNaN(days) && days > 0)
+                    .sort((a, b) => a - b);
+                
+                // 添加标题行（与网页标题一致）
+                wsData.push([{
+                    v: `${year}年${monthText}`,
+                    s: { 
+                        font: { sz: 14, bold: true }, 
+                        alignment: { horizontal: 'center' },
+                        fill: { fgColor: { rgb: 'F8E7DE' } },
+                        border: {
+                            top: { style: 'thin' },
+                            bottom: { style: 'thin' },
+                            left: { style: 'thin' },
+                            right: { style: 'thin' }
+                        }
+                    }
+                }]);
+
+                // 添加表头第一行
+                const headerRow1 = [{ 
+                    v: '产假开始日',
+                    s: { 
+                        font: { bold: true },
+                        alignment: { horizontal: 'center', vertical: 'center' },
+                        border: {
+                            top: { style: 'thin' },
+                            bottom: { style: 'thin' },
+                            left: { style: 'thin' },
+                            right: { style: 'thin' }
+                        },
+                        fill: { fgColor: { rgb: 'E0F7FA' } }
+                    }
+                }];
+
+                leaveDaysArray.forEach(days => {
+                    headerRow1.push({
+                        v: `产假${days}天`,
+                        s: {
+                            font: { bold: true },
+                            alignment: { horizontal: 'center' },
+                            border: {
+                                top: { style: 'thin' },
+                                bottom: { style: 'thin' },
+                                left: { style: 'thin' },
+                                right: { style: 'thin' }
+                            },
+                            fill: { fgColor: { rgb: 'E0F7FA' } }
+                        }
+                    });
+                    headerRow1.push({
+                        v: '',
+                        s: {
+                            border: {
+                                top: { style: 'thin' },
+                                bottom: { style: 'thin' },
+                                right: { style: 'thin' }
+                            },
+                            fill: { fgColor: { rgb: 'E0F7FA' } }
+                        }
+                    });
+                });
+                wsData.push(headerRow1);
+
+                // 添加表头第二行
+                const headerRow2 = [{ 
+                    v: '',
+                    s: {
+                        border: {
+                            bottom: { style: 'thin' },
+                            left: { style: 'thin' },
+                            right: { style: 'thin' }
+                        },
+                        fill: { fgColor: { rgb: 'FFEBEE' } }
+                    }
+                }];
+
+                leaveDaysArray.forEach(() => {
+                    headerRow2.push({
+                        v: '产假结束日',
+                        s: {
+                            font: { bold: true },
+                            alignment: { horizontal: 'center' },
+                            border: {
+                                bottom: { style: 'thin' },
+                                left: { style: 'thin' },
+                                right: { style: 'thin' }
+                            },
+                            fill: { fgColor: { rgb: 'FFEBEE' } }
+                        }
+                    });
+                    headerRow2.push({
+                        v: '含工作日天数',
+                        s: {
+                            font: { bold: true },
+                            alignment: { horizontal: 'center' },
+                            border: {
+                                bottom: { style: 'thin' },
+                                left: { style: 'thin' },
+                                right: { style: 'thin' }
+                            },
+                            fill: { fgColor: { rgb: 'FFEBEE' } }
+                        }
+                    });
+                });
+                wsData.push(headerRow2);
+
+                // 添加表格数据
+                const rows = Array.from(document.querySelectorAll('#resultTable tbody tr'));
+                rows.forEach(row => {
+                    const rowData = Array.from(row.cells).map(cell => {
+                        const style = {
+                            alignment: { horizontal: 'center' },
+                            border: {
+                                top: { style: 'thin' },
+                                bottom: { style: 'thin' },
+                                left: { style: 'thin' },
+                                right: { style: 'thin' }
+                            }
+                        };
+
+                        if (cell.classList.contains('holiday')) {
+                            style.fill = { fgColor: { rgb: 'FFEBEE' } };
+                        } else if (cell.classList.contains('workday')) {
+                            style.fill = { fgColor: { rgb: 'E8F5E9' } };
+                        } else if (cell.classList.contains('weekend')) {
+                            style.fill = { fgColor: { rgb: 'E0F7FA' } };
+                        }
+
+                        if (cell.style.color === 'red') {
+                            style.font = { color: { rgb: 'FF0000' }, bold: true };
+                        }
+
+                        return { v: cell.textContent, s: style };
+                    });
+                    wsData.push(rowData);
+                });
+
+                // 创建工作表
+                const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+                // 设置列宽
+                const baseWidth = 12;
+                ws['!cols'] = [{ wch: 25 }]; // 产假开始时间列宽
+                leaveDaysArray.forEach(() => {
+                    ws['!cols'].push({ wch: 25 }); // 结束时间列宽
+                    ws['!cols'].push({ wch: baseWidth }); // 工作日天数列宽
+                });
+
+                // 设置合并单元格
+                ws['!merges'] = [
+                    // 标题行合并
+                    { s: { r: 0, c: 0 }, e: { r: 0, c: leaveDaysArray.length * 2 } },
+                    { s: { r: 8, c: 0 }, e: { r: 8, c: leaveDaysArray.length * 2 } },
+                    // 产假开始时间列合并
+                    { s: { r: wsData.length - rows.length - 2, c: 0 }, e: { r: wsData.length - rows.length - 1, c: 0 } }
+                ];
+
+                // 添加天数标题的合并单元格
+                leaveDaysArray.forEach((_, index) => {
+                    ws['!merges'].push({
+                        s: { r: wsData.length - rows.length - 2, c: index * 2 + 1 },
+                        e: { r: wsData.length - rows.length - 2, c: index * 2 + 2 }
+                    });
+                });
+
+                // 将工作表添加到工作簿并导出
+                XLSX.utils.book_append_sheet(wb, ws, "产假计算结果");
+                XLSX.writeFile(wb, `产假计算结果_${year}_${monthText}.xlsx`);
+            } catch (error) {
+                console.error('导出Excel时发生错误:', error);
+                alert('导出Excel失败，请重试');
+            }
+        }
+
+        /**
+         * 主要的产假计算函数
+         */
+        async function calculateMaternityLeave() {
+            // 获取用户输入
+            const year = parseInt(document.getElementById('yearSelect').value);
+            const month = document.getElementById('monthSelect').value;
+            const startMonth = month === 'all' ? 0 : parseInt(month);
+            const endMonth = month === 'all' ? 11 : parseInt(month);
+            
+            // 解析产假天数输入
+            // 获取产假天数输入框的值
+            const leaveDaysInput = document.getElementById('leaveDays').value;
+            
+            // 将输入的字符串转换为数字数组:
+            // 1. 用逗号分隔字符串
+            // 2. 将每个字符串转换为整数
+            // 3. 过滤掉无效值(NaN)和负数
+            // 4. 按升序排序
+            const leaveDaysArray = leaveDaysInput.split(',')
+                .map(days => parseInt(days.trim())) // 去除空格并转换为整数
+                .filter(days => !isNaN(days) && days > 0) // 只保留有效的正整数
+                .sort((a, b) => a - b); // 升序排序
+
+            // 如果没有有效的产假天数,显示错误提示并返回
+            if (leaveDaysArray.length === 0) {
+                alert('请输入有效的产假天数！');
+                return;
+            }
+
+            // 更新表格标题
+            const caption = document.querySelector('#resultTable caption');
+            if (month === 'all') {
+                caption.textContent = `${year}年1月~12月`;
+            } else {
+                caption.textContent = `${year}年${parseInt(month) + 1}月`;
+            }
+
+            // 更新表头
+            const headerRow = document.getElementById('headerRow');
+            const thead = headerRow.parentNode;
+            
+            // 清除现有的表头行
+            while (thead.children.length > 1) {
+                thead.removeChild(thead.lastChild);
+            }
+            
+            // 创建新的子表头行
+            const subHeaderRow = document.createElement('tr');
+            
+            // 第一行
+            headerRow.innerHTML = '<th rowspan="2">产假开始日</th>';
+            leaveDaysArray.forEach(days => {
+                headerRow.innerHTML += `<th colspan="2">产假${days}天</th>`;
+            });
+            
+            // 第二行
+            subHeaderRow.innerHTML = '';
+            leaveDaysArray.forEach(() => {
+                subHeaderRow.innerHTML += `
+                    <th>产假结束日</th>
+                    <th>含工作日天数</th>
+                `;
+            });
+
+            // 将第二行添加到表头
+            thead.appendChild(subHeaderRow);
+
+            // 获取节假日数据
+            const holidayData = await getHolidayData(year);
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            try {
+                // 存储每月数据的对象
+                const monthlyData = {};
+                
+                // 遍历每个月份
+                for (let m = startMonth; m <= endMonth; m++) {
+                    monthlyData[m] = {
+                        days: [],
+                        maxWorkdays: {},
+                        maxTotal: {}
+                    };
+                    
+                    // 初始化每种产假天数的最大工作日数
+                    leaveDaysArray.forEach(days => {
+                        monthlyData[m].maxWorkdays[days] = 0;
+                        monthlyData[m].maxTotal[days] = 0;
+                    });
+                    
+                    // 计算每一天的产假情况
+                    // 遍历当月的每一天
+                    for (let day = 1; day <= new Date(year, m + 1, 0).getDate(); day++) {
+                        // 创建当天的开始日期对象
+                        const startDate = new Date(year, m, day);
+                        
+                        // 创建存储当天数据的对象
+                        const dayData = {
+                            day,                // 当月第几天
+                            startDate,          // 开始日期
+                            endDates: {},       // 存储不同产假天数的结束日期
+                            workingDays: {}     // 存储不同产假天数的工作日数量
+                        };
+
+                        // 遍历每种产假天数进行计算
+                        for (const days of leaveDaysArray) {
+                            // 计算实际的结束日期(减1是因为包含开始当天)
+                            const actualEndDate = addDays(startDate, days - 1, holidayData);
+                            // 存储结束日期
+                            dayData.endDates[days] = actualEndDate;
+                            // 计算并存储工作日数量
+                            dayData.workingDays[days] = await getWorkingDays(startDate, actualEndDate, holidayData);
+                            
+                            // 更新当月该产假天数的最大工作日数
+                            // 通过Math.max比较当前工作日数与已记录的最大值
+                            monthlyData[m].maxWorkdays[days] = Math.max(
+                                monthlyData[m].maxWorkdays[days], 
+                                dayData.workingDays[days]
+                            );
+                        }
+
+                        // 将当天的计算结果添加到月度数据中
+                        monthlyData[m].days.push(dayData);
+                    }
+                }
+
+                // 渲染表格数据
+                // 遍历每个月份
+                for (let m = startMonth; m <= endMonth; m++) {
+                    // 获取当前月份的数据
+                    const monthData = monthlyData[m];
+                    
+                    // 遍历当月的每一天
+                    for (const dayData of monthData.days) {
+                        // 创建新的表格行
+                        const row = tbody.insertRow();
+                        // 格式化开始日期
+                        const startDateStr = formatDate(dayData.startDate);
+                        
+                        // 添加开始日期单元格
+                        const startCell = row.insertCell();
+                        // 设置单元格内容:日期+日期类型(节假日/调休/周末)
+                        startCell.textContent = startDateStr + getDateType(startDateStr, holidayData);
+                        // 根据日期类型设置单元格样式(节假日红色/调休绿色/周末蓝色)
+                        applyCellStyle(startCell, startDateStr, holidayData);
+
+                        // 遍历每种产假天数(如158天、178天、190天)
+                        leaveDaysArray.forEach(days => {
+                            // 格式化结束日期
+                            const endDateStr = formatDate(dayData.endDates[days]);
+                            
+                            // 添加结束日期单元格
+                            const endCell = row.insertCell();
+                            // 设置单元格内容:日期+日期类型
+                            endCell.textContent = endDateStr + getDateType(endDateStr, holidayData);
+                            // 设置单元格样式
+                            applyCellStyle(endCell, endDateStr, holidayData);
+
+                            // 添加工作日数单元格
+                            const workdaysCell = row.insertCell();
+                            // 设置工作日数
+                            workdaysCell.textContent = dayData.workingDays[days];
+                            // 如果是当月该产假类型的最大工作日数,标红加粗显示
+                            if (dayData.workingDays[days] === monthData.maxWorkdays[days]) {
+                                workdaysCell.style.color = 'red';
+                                workdaysCell.style.fontWeight = 'bold';
+                            }
+                        });
+                    }
+                }
+
+                updateExportButtonState(true);
+            } catch (error) {
+                console.error('计算错误:', error);
+                updateExportButtonState(false);
+                tbody.innerHTML = '<tr><td colspan="10">计算出错，请刷新页面重试</td></tr>';
+            }
+        }
+
+        // 应用单元格样式
+        function applyCellStyle(cell, dateStr, holidayData) {
+            if (holidayData.holidays[dateStr]) {
+                cell.classList.add('holiday');
+            } else if (holidayData.workdays.includes(dateStr)) {
+                cell.classList.add('workday');
+            } else {
+                const date = new Date(dateStr);
+                const dayOfWeek = date.getDay();
+                if (dayOfWeek === 0 || dayOfWeek === 6) {
+                    cell.classList.add('weekend');
+                }
+            }
+        }
+
+        /**
+         * 更新水印预览
+         */
+        function updateWatermarkPreview() {
+            const container = document.getElementById('watermarkContainer');
+            const text = document.getElementById('watermarkText').value || '产假计算器';
+            const opacity = document.getElementById('watermarkOpacity').value;
+            const spacing = document.getElementById('watermarkSpacing').value;
+            
+            // 更新显示值
+            document.getElementById('opacityValue').textContent = opacity + '%';
+            document.getElementById('spacingValue').textContent = spacing + 'px';
+            
+            // 清除现有水印
+            container.innerHTML = '';
+            
+            // 计算水印数量和位置
+            const screenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+            const screenHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+            const rows = Math.ceil(screenHeight / spacing) + 1;
+            const cols = Math.ceil(screenWidth / spacing) + 1;
+            
+            // 添加水印
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    const watermark = document.createElement('div');
+                    watermark.className = 'watermark-text';
+                    watermark.textContent = text;
+                    watermark.style.left = (j * spacing) + 'px';
+                    watermark.style.top = (i * spacing) + 'px';
+                    watermark.style.opacity = opacity / 100;
+                    container.appendChild(watermark);
+                }
+            }
+        }
+        
+        // 添加水印间距滑块的事件监听器
+        document.getElementById('watermarkSpacing').addEventListener('input', updateWatermarkPreview);
+
+        /**
+         * 导出表格为图片
+         */
+        async function exportToImage() {
+            try {
+                // 显示加载提示
+                const loadingTip = document.getElementById('loadingTip');
+                loadingTip.style.display = 'block';
+                
+                // 创建一个容器用于导出
+                const content = document.createElement('div');
+                content.style.padding = '20px';
+                content.style.background = 'white';
+                content.style.position = 'relative';
+                
+                // 获取用户设置的导出宽度
+                const exportWidth = parseInt(document.getElementById('exportWidth').value) || 1000;
+                content.style.width = exportWidth + 'px';
+
+                // 获取表格标题
+                const caption = document.querySelector('#resultTable caption').textContent;
+                const isDueDate = caption.includes('预产期');
+                
+                // 添加表格
+                const table = document.getElementById('resultTable').cloneNode(true);
+                content.appendChild(table);
+                
+                // 临时将内容添加到文档中
+                document.body.appendChild(content);
+                
+                // 获取水印设置
+                const watermarkText = document.getElementById('watermarkText').value || '产假计算器';
+                const watermarkOpacity = document.getElementById('watermarkOpacity').value / 100;
+                const watermarkSpacing = document.getElementById('watermarkSpacing').value;
+                
+                // 创建水印层
+                const watermarkContainer = document.createElement('div');
+                watermarkContainer.style.position = 'absolute';
+                watermarkContainer.style.top = '0';
+                watermarkContainer.style.left = '0';
+                watermarkContainer.style.width = '100%';
+                watermarkContainer.style.height = '100%';
+                watermarkContainer.style.pointerEvents = 'none';
+                watermarkContainer.style.zIndex = '1000';
+                
+                // 计算水印数量和位置
+                const containerRect = content.getBoundingClientRect();
+                const rows = Math.ceil(containerRect.height / watermarkSpacing);
+                const cols = Math.ceil(containerRect.width / watermarkSpacing);
+                
+                // 添加水印元素
+                for (let i = 0; i < rows; i++) {
+                    for (let j = 0; j < cols; j++) {
+                        const watermark = document.createElement('div');
+                        watermark.className = 'watermark-text';
+                        watermark.textContent = watermarkText;
+                        watermark.style.position = 'absolute';
+                        watermark.style.left = (j * watermarkSpacing) + 'px';
+                        watermark.style.top = (i * watermarkSpacing) + 'px';
+                        watermark.style.opacity = watermarkOpacity;
+                        watermark.style.transform = 'rotate(-45deg)';
+                        watermark.style.transformOrigin = 'center';
+                        watermark.style.fontSize = '18px';
+                        watermark.style.fontFamily = 'Arial, sans-serif';
+                        watermark.style.color = `rgba(0, 0, 0, ${watermarkOpacity})`;
+                        watermark.style.whiteSpace = 'nowrap';
+                        watermark.style.width = 'max-content';
+                        watermark.style.userSelect = 'none';
+                        watermark.style.pointerEvents = 'none';
+                        watermark.style.zIndex = '1000';
+                        watermarkContainer.appendChild(watermark);
+                    }
+                }
+                
+                // 将水印层添加到内容中
+                content.appendChild(watermarkContainer);
+                
+                // 等待一小段时间确保水印渲染完成
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                // 配置html2canvas选项
+                const options = {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    onclone: (clonedDoc) => {
+                        const clonedContent = clonedDoc.querySelector('div');
+                        if (clonedContent) {
+                            clonedContent.style.width = 'fit-content';
+                            clonedContent.style.margin = '0 auto';
+                        }
+                    }
+                };
+                
+                // 生成图片
+                const canvas = await html2canvas(content, options);
+                
+                // 移除临时内容
+                document.body.removeChild(content);
+                
+                // 获取图片数据
+                const imageData = canvas.toDataURL('image/png', 1.0);
+                
+                // 创建下载链接
+                const link = document.createElement('a');
+                // 生成文件名
+                let fileName;
+                if (isDueDate) {
+                    // 预产期模式：移除"预产期"前缀，保留日期
+                    fileName = `预产期产假计算结果_${caption.replace('预产期', '')}`;
+                } else {
+                    // 普通模式：直接使用年月
+                    fileName = `产假计算结果_${caption}`;
+                }
+                // 清理文件名中的特殊字符
+                fileName = fileName.replace(/[\\/:*?"<>|]/g, '-');
+                link.download = `${fileName}.png`;
+                link.href = imageData;
+                
+                // 显示下载提示
+                const downloadTip = document.getElementById('downloadTip');
+                downloadTip.style.display = 'block';
+                
+                // 触发下载
+                link.click();
+                
+                // 3秒后隐藏提示
+                setTimeout(() => {
+                    downloadTip.style.display = 'none';
+                }, 3000);
+            } catch (error) {
+                console.error('导出图片时发生错误:', error);
+                alert('导出图片失败，请重试');
+            } finally {
+                // 隐藏加载提示
+                loadingTip.style.display = 'none';
+            }
+        }
+
+        /**
+         * 计算预产期相关的产假日期
+         */
+        async function calculateDueDateLeave() {
+            try {
+                const dueDate = new Date(document.getElementById('dueDate').value);
+                const leaveDays = parseInt(document.getElementById('dueDateLeaveDays').value);
+                
+                if (isNaN(dueDate.getTime())) {
+                    alert('请选择有效的预产期日期！');
+                    return;
+                }
+                
+                if (isNaN(leaveDays) || leaveDays <= 0) {
+                    alert('请输入有效的产假天数！');
+                    return;
+                }
+
+                // 获取节假日数据
+                const year = dueDate.getFullYear();
+                const holidayData = await getHolidayData(year);
+                
+                // 清空表格内容
+                const tbody = document.getElementById('tableBody');
+                tbody.innerHTML = '';
+                
+                // 更新表格标题
+                const caption = document.querySelector('#resultTable caption');
+                caption.textContent = `预产期${formatDate(dueDate)}`;
+                
+                // 更新表头
+                const headerRow = document.getElementById('headerRow');
+                const thead = headerRow.parentNode;
+                
+                // 清除现有的表头行
+                while (thead.children.length > 1) {
+                    thead.removeChild(thead.lastChild);
+                }
+                
+                // 创建新的子表头行
+                const subHeaderRow = document.createElement('tr');
+                
+                // 第一行
+                headerRow.innerHTML = '<th rowspan="2">产假开始日</th><th colspan="2">产假' + leaveDays + '天</th>';
+                
+                // 第二行
+                subHeaderRow.innerHTML = '<th>产假结束日</th><th>含工作日天数</th>';
+                
+                // 将第二行添加到表头
+                thead.appendChild(subHeaderRow);
+                
+                // 存储所有工作日天数，用于找出最大值
+                const allWorkingDays = [];
+                
+                // 计算预产期前30天的每一天
+                for (let i = 30; i >= 0; i--) {
+                    const startDate = new Date(dueDate);
+                    startDate.setDate(startDate.getDate() - i);
+                    
+                    // 计算结束日期
+                    const endDate = addDays(startDate, leaveDays - 1, holidayData);
+                    
+                    // 计算工作日天数
+                    const workingDays = await getWorkingDays(startDate, endDate, holidayData);
+                    allWorkingDays.push(workingDays);
+                }
+                
+                // 找出最大工作日天数
+                const maxWorkingDays = Math.max(...allWorkingDays);
+                
+                // 重新遍历并创建表格行
+                for (let i = 30; i >= 0; i--) {
+                    const startDate = new Date(dueDate);
+                    startDate.setDate(startDate.getDate() - i);
+                    
+                    // 计算结束日期
+                    const endDate = addDays(startDate, leaveDays - 1, holidayData);
+                    
+                    // 计算工作日天数
+                    const workingDays = await getWorkingDays(startDate, endDate, holidayData);
+                    
+                    // 创建新行
+                    const row = tbody.insertRow();
+                    
+                    // 添加开始日期
+                    const startDateStr = formatDate(startDate);
+                    const startCell = row.insertCell();
+                    startCell.textContent = startDateStr + getDateType(startDateStr, holidayData);
+                    applyCellStyle(startCell, startDateStr, holidayData);
+                    
+                    // 添加结束日期
+                    const endDateStr = formatDate(endDate);
+                    const endCell = row.insertCell();
+                    endCell.textContent = endDateStr + getDateType(endDateStr, holidayData);
+                    applyCellStyle(endCell, endDateStr, holidayData);
+                    
+                    // 添加工作日天数
+                    const workdaysCell = row.insertCell();
+                    workdaysCell.textContent = workingDays;
+                    
+                    // 如果是最大工作日数，标红加粗显示
+                    if (workingDays === maxWorkingDays) {
+                        workdaysCell.style.color = 'red';
+                        workdaysCell.style.fontWeight = 'bold';
+                    }
+                }
+                
+                updateExportButtonState(true);
+            } catch (error) {
+                console.error('计算错误:', error);
+                alert('计算出错，请重试');
+            }
+        }
+
+        /**
+         * 导出预产期计算结果到Excel文件
+         */
+        function exportDueDateToExcel() {
+            try {
+                const dueDate = new Date(document.getElementById('dueDate').value);
+                const leaveDays = parseInt(document.getElementById('dueDateLeaveDays').value);
+
+                // 创建新的工作簿
+                const wb = XLSX.utils.book_new();
+                const wsData = [];
+
+                // 添加标题行
+                wsData.push([{
+                    v: '产假计算结果',
+                    s: { font: { sz: 16, bold: true }, alignment: { horizontal: 'center' } }
+                }]);
+                wsData.push([]); // 空行
+
+                // 添加图例说明
+                wsData.push([{ v: '说明：', s: { font: { bold: true } } }]);
+                wsData.push([{ v: '■ 法定节假日', s: { fill: { fgColor: { rgb: 'FFEBEE' } } } }]);
+                wsData.push([{ v: '■ 调休工作日（需要补班）', s: { fill: { fgColor: { rgb: 'E8F5E9' } } } }]);
+                wsData.push([{ v: '■ 周末', s: { fill: { fgColor: { rgb: 'E0F7FA' } } } }]);
+                wsData.push([{ v: '■ 红色数字表示工作日天数最多的日期', s: { font: { color: { rgb: 'FF0000' } } } }]);
+                wsData.push([]);
+
+                // 添加标题行（与网页标题一致）
+                wsData.push([{
+                    v: `预产期${formatDate(dueDate)}`,
+                    s: { 
+                        font: { sz: 14, bold: true }, 
+                        alignment: { horizontal: 'center' },
+                        fill: { fgColor: { rgb: 'F8E7DE' } },
+                        border: {
+                            top: { style: 'thin' },
+                            bottom: { style: 'thin' },
+                            left: { style: 'thin' },
+                            right: { style: 'thin' }
+                        }
+                    }
+                }]);
+
+                // 添加表头第一行
+                const headerRow1 = [{ 
+                    v: '产假开始日',
+                    s: { 
+                        font: { bold: true },
+                        alignment: { horizontal: 'center', vertical: 'center' },
+                        border: {
+                            top: { style: 'thin' },
+                            bottom: { style: 'thin' },
+                            left: { style: 'thin' },
+                            right: { style: 'thin' }
+                        },
+                        fill: { fgColor: { rgb: 'E0F7FA' } }
+                    }
+                }, {
+                    v: `产假${leaveDays}天`,
+                    s: {
+                        font: { bold: true },
+                        alignment: { horizontal: 'center' },
+                        border: {
+                            top: { style: 'thin' },
+                            bottom: { style: 'thin' },
+                            left: { style: 'thin' },
+                            right: { style: 'thin' }
+                        },
+                        fill: { fgColor: { rgb: 'E0F7FA' } }
+                    }
+                }, {
+                    v: '',
+                    s: {
+                        border: {
+                            top: { style: 'thin' },
+                            bottom: { style: 'thin' },
+                            right: { style: 'thin' }
+                        },
+                        fill: { fgColor: { rgb: 'E0F7FA' } }
+                    }
+                }];
+                wsData.push(headerRow1);
+
+                // 添加表头第二行
+                const headerRow2 = [{ 
+                    v: '',
+                    s: {
+                        border: {
+                            bottom: { style: 'thin' },
+                            left: { style: 'thin' },
+                            right: { style: 'thin' }
+                        },
+                        fill: { fgColor: { rgb: 'FFEBEE' } }
+                    }
+                }, {
+                    v: '产假结束日',
+                    s: {
+                        font: { bold: true },
+                        alignment: { horizontal: 'center' },
+                        border: {
+                            bottom: { style: 'thin' },
+                            left: { style: 'thin' },
+                            right: { style: 'thin' }
+                        },
+                        fill: { fgColor: { rgb: 'FFEBEE' } }
+                    }
+                }, {
+                    v: '含工作日天数',
+                    s: {
+                        font: { bold: true },
+                        alignment: { horizontal: 'center' },
+                        border: {
+                            bottom: { style: 'thin' },
+                            left: { style: 'thin' },
+                            right: { style: 'thin' }
+                        },
+                        fill: { fgColor: { rgb: 'FFEBEE' } }
+                    }
+                }];
+                wsData.push(headerRow2);
+
+                // 添加表格数据
+                const rows = Array.from(document.querySelectorAll('#resultTable tbody tr'));
+                rows.forEach(row => {
+                    const rowData = Array.from(row.cells).map(cell => {
+                        const style = {
+                            alignment: { horizontal: 'center' },
+                            border: {
+                                top: { style: 'thin' },
+                                bottom: { style: 'thin' },
+                                left: { style: 'thin' },
+                                right: { style: 'thin' }
+                            }
+                        };
+
+                        if (cell.classList.contains('holiday')) {
+                            style.fill = { fgColor: { rgb: 'FFEBEE' } };
+                        } else if (cell.classList.contains('workday')) {
+                            style.fill = { fgColor: { rgb: 'E8F5E9' } };
+                        } else if (cell.classList.contains('weekend')) {
+                            style.fill = { fgColor: { rgb: 'E0F7FA' } };
+                        }
+
+                        if (cell.style.color === 'red') {
+                            style.font = { color: { rgb: 'FF0000' }, bold: true };
+                        }
+
+                        return { v: cell.textContent, s: style };
+                    });
+                    wsData.push(rowData);
+                });
+
+                // 创建工作表
+                const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+                // 设置列宽
+                ws['!cols'] = [
+                    { wch: 25 }, // 产假开始时间列宽
+                    { wch: 25 }, // 结束时间列宽
+                    { wch: 12 }  // 工作日天数列宽
+                ];
+
+                // 设置合并单元格
+                ws['!merges'] = [
+                    // 标题行合并
+                    { s: { r: 0, c: 0 }, e: { r: 0, c: 2 } },
+                    { s: { r: 8, c: 0 }, e: { r: 8, c: 2 } },
+                    // 产假开始时间列合并
+                    { s: { r: wsData.length - rows.length - 2, c: 0 }, e: { r: wsData.length - rows.length - 1, c: 0 } },
+                    // 产假天数标题合并
+                    { s: { r: wsData.length - rows.length - 2, c: 1 }, e: { r: wsData.length - rows.length - 2, c: 2 } }
+                ];
+
+                // 将工作表添加到工作簿并导出
+                XLSX.utils.book_append_sheet(wb, ws, "预产期产假计算结果");
+                XLSX.writeFile(wb, `预产期产假计算结果_${formatDate(dueDate)}.xlsx`);
+            } catch (error) {
+                console.error('导出Excel时发生错误:', error);
+                alert('导出Excel失败，请重试');
+            }
+        }
+
+        // 添加事件监听器
+        document.getElementById('calculateBtn').addEventListener('click', calculateMaternityLeave);
+        document.getElementById('calculateDueDate').addEventListener('click', calculateDueDateLeave);
+        document.getElementById('exportBtn').addEventListener('click', exportToExcel);
+        document.getElementById('exportDueDateBtn').addEventListener('click', exportDueDateToExcel);
+        document.getElementById('exportImageBtn').addEventListener('click', async () => {
+            // 检查是否有计算结果
+            const tbody = document.getElementById('tableBody');
+            if (!tbody.children.length) {
+                alert('请先进行计算后再导出图片！');
+                return;
+            }
+            await exportToImage();
+        });
+        document.getElementById('exportDueDateImageBtn').addEventListener('click', async () => {
+            // 检查是否有计算结果
+            const tbody = document.getElementById('tableBody');
+            if (!tbody.children.length) {
+                alert('请先进行计算后再导出图片！');
+                return;
+            }
+            await exportToImage();
+        });
+
+        // 添加水印设置相关的事件监听器
+        document.getElementById('watermarkText').addEventListener('input', updateWatermarkPreview);
+        document.getElementById('watermarkOpacity').addEventListener('input', updateWatermarkPreview);
+        
+        // 初始化水印预览
+        updateWatermarkPreview();
+    </script>
+</body>
+</html> 
